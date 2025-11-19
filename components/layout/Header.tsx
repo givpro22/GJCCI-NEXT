@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import {
   NavigationMenu,
@@ -14,9 +12,9 @@ import { ROUTES } from "@/constants/routes";
 
 export function Header() {
   return (
-    <header>
-      <div className="container flex h-16 items-center justify-between px-4">
-        <Link href={ROUTES.HOME} className="font-bold text-xl px-10">
+    <header className="sticky top-0 z-50 bg-gray-100">
+      <div className=" flex h-16 items-center justify-between px-20 ">
+        <Link href={ROUTES.HOME}>
           <img src="/favicon.png" alt="Logo" className="h-8" />
         </Link>
 
@@ -26,9 +24,11 @@ export function Header() {
             <NavigationMenuList>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link href="/about" className="px-4 py-2">
-                    About
-                  </Link>
+                  <Button asChild>
+                    <Link href={ROUTES.LOGIN} className="px-4 py-2">
+                      로그인
+                    </Link>
+                  </Button>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
