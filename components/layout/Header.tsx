@@ -35,7 +35,7 @@ export function Header() {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link href="/blog" className="px-4 py-2">
-                    Blog
+                    시험일정
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -43,7 +43,7 @@ export function Header() {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link href="/contact" className="px-4 py-2">
-                    Contact
+                    커뮤니티
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
