@@ -4,9 +4,7 @@ import { authConfig } from "./auth.config";
 import { z } from "zod";
 import type { User } from "@/lib/definitions";
 import { createClient } from "./utils/supabase/server";
-// import bcrypt from "bcrypt";
-
-const supabase = await createClient();
+import bcrypt from "bcryptjs";
 
 export async function getUser(email: string): Promise<User | null> {
   const supabase = await createClient();
@@ -38,6 +36,8 @@ export const { auth, signIn, signOut } = NextAuth({
           const { email, password } = parsedCredentials.data;
           const user = await getUser(email);
           if (!user) return null;
+          const passwordsMatch = await bcrypt.compare(password, user.password);
+          if (passwordsMatch) return user;
         }
 
         return null;

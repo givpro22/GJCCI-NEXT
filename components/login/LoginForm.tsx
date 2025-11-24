@@ -15,6 +15,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useSearchParams } from "next/navigation";
+import { useActionState } from "react";
+import { authenticate } from "@/lib/actions";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -23,6 +26,13 @@ const formSchema = z.object({
 });
 
 export function LoginForm() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const [errorMessage, formAction, isPending] = useActionState(
+    authenticate,
+    undefined
+  );
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
