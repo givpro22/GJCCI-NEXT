@@ -14,6 +14,8 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui";
+import { createClient } from "@/utils/supabase/server";
+import { createNClient } from "@/utils/supabase/client";
 
 const signUpSchema = z
   .object({
@@ -33,6 +35,14 @@ const signUpSchema = z
 
 type SignUpFormValues = z.infer<typeof signUpSchema>;
 
+export async function signPost(values: SignUpFormValues) {
+  const supabase = await createNClient();
+  const { data, error } = await supabase.auth.signUp({
+    email: values.email,
+    password: values.password,
+  });
+}
+
 export function SignUpForm() {
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
@@ -45,8 +55,7 @@ export function SignUpForm() {
   });
 
   function onSubmit(values: SignUpFormValues) {
-    // TODO: 서버 액션/회원가입 API 연동
-    console.log("회원가입 폼 값:", values);
+    signPost(values);
   }
 
   return (
