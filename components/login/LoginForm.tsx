@@ -16,8 +16,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "next/navigation";
-import { useActionState } from "react";
+import { startTransition, useActionState } from "react";
 import { authenticate } from "@/lib/actions";
+import { ROUTES } from "@/constants/routes";
+import Link from "next/link";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -50,7 +52,9 @@ export function LoginForm() {
     const formData = new FormData();
     formData.append("email", values.email);
     formData.append("password", values.password);
-    formAction(formData);
+    startTransition(() => {
+      formAction(formData);
+    });
   }
   return (
     <Form {...form}>
@@ -84,9 +88,16 @@ export function LoginForm() {
         {errorMessage ? (
           <p className="text-sm text-red-500">{errorMessage}</p>
         ) : null}
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "로그인 중..." : "Submit"}
-        </Button>
+        <div className="flex gap-2 justify-between">
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "로그인 중..." : "Submit"}
+          </Button>
+          <Button asChild type="button" variant="secondary">
+            <Link href={ROUTES.SIGNUP} className="px-4 py-2">
+              회원가입
+            </Link>
+          </Button>
+        </div>
       </form>
     </Form>
   );
