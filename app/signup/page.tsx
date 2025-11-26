@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { SignUpForm } from "@/components/signup";
 import { Button } from "@/components/ui";
+import Link from "next/link";
 
 export default function SignUpPage() {
   return (
@@ -25,7 +26,9 @@ export default function SignUpPage() {
         <CardFooter className="flex justify-center text-sm text-muted-foreground">
           이미 계정이 있다면?
           <Button variant="link" className="p-0 ml-1" asChild>
-            <span className="ml-1 font-medium">로그인</span>
+            <Link href="/login" className="ml-1 font-medium">
+              로그인
+            </Link>
           </Button>
         </CardFooter>
       </Card>
