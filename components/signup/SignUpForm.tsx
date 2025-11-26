@@ -35,11 +35,17 @@ const signUpSchema = z
 export type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 export async function signPost(values: SignUpFormValues) {
-  const supabase = await createNClient();
+  const supabase = createNClient();
   const { data, error } = await supabase.auth.signUp({
     email: values.email,
     password: values.password,
+    options: {
+      data: {
+        name: values.name,
+      },
+    },
   });
+  return { data, error };
 }
 
 export function SignUpForm() {
