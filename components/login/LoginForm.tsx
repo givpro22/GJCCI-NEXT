@@ -90,7 +90,7 @@ export function LoginForm() {
         ) : null}
         <div className="flex gap-2 justify-between">
           <Button type="submit" disabled={isPending}>
-            {isPending ? "로그인 중..." : "Submit"}
+            {isPending ? "로그인 중..." : "로그인"}
           </Button>
           <Button asChild type="button" variant="secondary">
             <Link href={ROUTES.SIGNUP} className="px-4 py-2">

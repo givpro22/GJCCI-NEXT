@@ -4,8 +4,3 @@ export type User = {
   email: string;
   password: string;
 };
-
-export type SignUpFormValues = {
-  email: string;
-  password: string;
-};

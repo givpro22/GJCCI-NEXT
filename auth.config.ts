@@ -11,7 +11,7 @@ export const authConfig = {
       const pathname = nextUrl.pathname;
 
       const isAuthPage = pathname === "/login" || pathname === "/signup";
-      const isHomePage = pathname === "/";
+      // const isHomePage = pathname === "/";
       const isDashboard = pathname.startsWith("/dashboard");
 
       if (isAuthPage) {

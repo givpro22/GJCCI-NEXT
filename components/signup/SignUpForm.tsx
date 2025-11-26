@@ -14,7 +14,7 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui";
-import { createNClient } from "@/utils/supabase/client";
+import { createClientSideSupabaseClient } from "@/utils/supabase/client";
 
 const signUpSchema = z
   .object({
@@ -35,7 +35,7 @@ const signUpSchema = z
 export type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 export async function signPost(values: SignUpFormValues) {
-  const supabase = createNClient();
+  const supabase = createClientSideSupabaseClient();
   const { data, error } = await supabase.auth.signUp({
     email: values.email,
     password: values.password,
