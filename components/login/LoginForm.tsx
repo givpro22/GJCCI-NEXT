@@ -16,12 +16,17 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "next/navigation";
-import { useActionState } from "react";
+import { startTransition, useActionState } from "react";
 import { authenticate } from "@/lib/actions";
+import { ROUTES } from "@/constants/routes";
+import Link from "next/link";
 
 const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  email: z.string().email({
+    message: "유효한 이메일 형식을 입력해주세요.",
+  }),
+  password: z.string().min(6, {
+    message: "비밀번호는 최소 6자 이상이어야 합니다.",
   }),
 });
 
@@ -37,36 +42,62 @@ export function LoginForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      email: "",
+      password: "",
     },
   });
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    const formData = new FormData();
+    formData.append("email", values.email);
+    formData.append("password", values.password);
+    startTransition(() => {
+      formAction(formData);
+    });
   }
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
-          name="username"
+          name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>이메일</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input placeholder="you@example.com" {...field} />
               </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>비밀번호</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="••••••••" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {errorMessage ? (
+          <p className="text-sm text-red-500">{errorMessage}</p>
+        ) : null}
+        <div className="flex gap-2 justify-between">
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "로그인 중..." : "로그인"}
+          </Button>
+          <Button asChild type="button" variant="secondary">
+            <Link href={ROUTES.SIGNUP} className="px-4 py-2">
+              회원가입
+            </Link>
+          </Button>
+        </div>
       </form>
     </Form>
   );
