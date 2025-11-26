@@ -14,7 +14,6 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui";
-import { createClient } from "@/utils/supabase/server";
 import { createNClient } from "@/utils/supabase/client";
 
 const signUpSchema = z
@@ -33,7 +32,7 @@ const signUpSchema = z
     path: ["confirmPassword"],
   });
 
-type SignUpFormValues = z.infer<typeof signUpSchema>;
+export type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 export async function signPost(values: SignUpFormValues) {
   const supabase = await createNClient();
@@ -54,8 +53,12 @@ export function SignUpForm() {
     },
   });
 
-  function onSubmit(values: SignUpFormValues) {
-    signPost(values);
+  async function onSubmit(values: SignUpFormValues) {
+    try {
+      await signPost(values);
+    } catch (error) {
+      throw error;
+    }
   }
 
   return (
