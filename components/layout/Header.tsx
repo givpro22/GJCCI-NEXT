@@ -14,7 +14,8 @@ import { signOut, useSession } from "next-auth/react";
 
 export function Header() {
   const { data: session, status } = useSession();
-
+  console.log("Header status:", status);
+  console.log("Session in Header:", session);
   return (
     <header className="sticky top-0 z-50 bg-gray-100">
       <div className=" flex h-16 items-center justify-between px-20 ">
