@@ -12,9 +12,6 @@ export default function page() {
 
   const { data: session, status } = useSession();
 
-  console.log("session:", session);
-  console.log("status:", status);
-
   useEffect(() => {
     setToday(new Date().toLocaleDateString());
   }, []);

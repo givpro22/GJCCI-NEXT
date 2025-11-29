@@ -2,25 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { z } from "zod";
-import type { User } from "@/lib/definitions";
 import { createClient } from "./utils/supabase/server";
-import bcrypt from "bcryptjs";
-
-// export async function getUser(email: string): Promise<User | null> {
-//   const supabase = await createClient();
-
-//   const { data, error } = await supabase
-//     .from("users")
-//     .select("*")
-//     .eq("email", email)
-//     .maybeSingle<User>(); // 또는 .single<User>()
-//   if (error) {
-//     console.error("getUser error", error);
-//     return null;
-//   }
-
-//   return data;
-// }
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
   ...authConfig,
@@ -78,8 +60,8 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     async session({ session, token }) {
       // 클라이언트에서 세션 확인할 때
       if (session.user) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
+        session.user.id = token.id;
+        session.user.email = token.email;
       }
       return session;
     },
