@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import {
   NavigationMenu,
@@ -9,8 +10,11 @@ import {
 import { Menu } from "lucide-react";
 import { Button, Sheet, SheetContent, SheetTrigger } from "../ui";
 import { ROUTES } from "@/constants/routes";
+import { signOut, useSession } from "next-auth/react";
 
 export function Header() {
+  const { data: session, status } = useSession();
+
   return (
     <header className="sticky top-0 z-50 bg-gray-100">
       <div className=" flex h-16 items-center justify-between px-20 ">
@@ -24,11 +28,21 @@ export function Header() {
             <NavigationMenuList>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Button asChild>
-                    <Link href={ROUTES.LOGIN} className="px-4 py-2">
-                      로그인
-                    </Link>
-                  </Button>
+                  {session ? (
+                    <Button
+                      variant="destructive"
+                      className="px-4 py-2"
+                      onClick={() => signOut()}
+                    >
+                      로그아웃
+                    </Button>
+                  ) : (
+                    <Button asChild>
+                      <Link href={ROUTES.LOGIN} className="px-4 py-2">
+                        로그인
+                      </Link>
+                    </Button>
+                  )}
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
