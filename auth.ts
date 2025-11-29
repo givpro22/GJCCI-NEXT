@@ -2,46 +2,68 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { z } from "zod";
-import type { User } from "@/lib/definitions";
 import { createClient } from "./utils/supabase/server";
-import bcrypt from "bcryptjs";
 
-export async function getUser(email: string): Promise<User | null> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("users")
-    .select("*")
-    .eq("email", email)
-    .maybeSingle<User>(); // 또는 .single<User>()
-
-  if (error) {
-    console.error("getUser error", error);
-    return null;
-  }
-
-  return data;
-}
-
-export const { auth, signIn, signOut } = NextAuth({
+export const { auth, signIn, signOut, handlers } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
+      name: "Supabase Credentials",
       async authorize(credentials) {
-        const parsedCredentials = z
-          .object({ email: z.string().email(), password: z.string().min(6) })
+        const parsed = z
+          .object({
+            email: z.string().email(),
+            password: z.string().min(6),
+          })
           .safeParse(credentials);
 
-        if (parsedCredentials.success) {
-          const { email, password } = parsedCredentials.data;
-          const user = await getUser(email);
-          if (!user) return null;
-          const passwordsMatch = await bcrypt.compare(password, user.password);
-          if (passwordsMatch) return user;
+        if (!parsed.success) {
+          console.log("zod fail");
+          return null;
         }
 
-        return null;
+        const { email, password } = parsed.data;
+
+        const supabase = await createClient();
+
+        // 🔥 Supabase Auth로 실제 로그인 시도
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error || !data.user) {
+          console.log("supabase auth fail", error);
+          return null;
+        }
+
+        const supaUser = data.user;
+
+        // NextAuth에 넘겨줄 user 객체
+        return {
+          id: supaUser.id,
+          email: supaUser.email,
+        };
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      // authorize()가 user를 반환했을 때
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+      }
+      return token;
+    },
+
+    async session({ session, token }) {
+      // 클라이언트에서 세션 확인할 때
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.email = token.email;
+      }
+      return session;
+    },
+  },
 });
