@@ -19,6 +19,7 @@ const CATEGORIES = [
   { id: "notice", label: "공지" },
   { id: "free", label: "자유" },
   { id: "error", label: "오류" },
+  { id: "subproctor-only", label: "부감독 전용" },
 ];
 
 type CategoryId = (typeof CATEGORIES)[number]["id"];
