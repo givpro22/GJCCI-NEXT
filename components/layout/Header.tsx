@@ -23,8 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Header() {
   const { data: session, status } = useSession();
-  console.log("Header status:", status);
-  console.log("Session in Header:", session);
+
   return (
     <header className="sticky top-0 z-50 bg-gray-100">
       <div className=" flex h-16 items-center justify-between px-20 ">
@@ -75,7 +74,7 @@ export function Header() {
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/my/profile">마이 프로필</Link>
+                        <Link href={ROUTES.MY_PROFILE}>마이 프로필</Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
