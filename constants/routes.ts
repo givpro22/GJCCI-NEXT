@@ -3,7 +3,9 @@ export const ROUTES = {
   HOME: "/",
   LOGIN: "/login",
   SIGNUP: "/signup",
-
+  COMMUNITY: "/community",
+  SCHEDULER: "/exam-schedule",
+  MY_PROFILE: "/my/profile",
   POST: {
     ROOT: "/posts",
     DETAIL: (id: string | number) => `/posts/${id}`,
