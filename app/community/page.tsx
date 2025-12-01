@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PostCard from "@/components/community/PostCard";
 import { Separator } from "@/components/ui/separator";
 import { CategorySidebar } from "@/components/community/CategorySidebar";
@@ -8,22 +8,39 @@ import { CATEGORIES, CategoryId, Post } from "@/lib/definitions";
 import { MOCK_POSTS } from "@/constants/data";
 import { MobileCategoryTab } from "@/components/community/MobileCategoryTab";
 import Composer from "@/components/community/composer";
+import { createPost, fetchPosts } from "@/lib/supabase";
 
 function CommunityPage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>("all");
   const [newPostContent, setNewPostContent] = useState("");
+  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS);
+  const [newPostTitle, setNewPostTitle] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
-  const filteredPosts =
-    selectedCategory === "all"
-      ? MOCK_POSTS
-      : MOCK_POSTS.filter((post) => post.category === selectedCategory);
-
-  const handleCreatePost = () => {
-    // 아직 실제 API 연동 전이므로 경고만 표시
+  const handleCreatePost = async () => {
     if (!newPostContent.trim()) return;
-    alert("게시글 작성 기능은 이후에 연동될 예정입니다 🙂");
+    await createPost({
+      author: isAnonymous ? "익명" : "관리자",
+      category: selectedCategory,
+      title: newPostTitle,
+      content: newPostContent,
+      likes: 0,
+      comments: 0,
+    });
+    const updated = await fetchPosts(selectedCategory);
+    setPosts(updated);
     setNewPostContent("");
+    setNewPostTitle("");
+    setIsAnonymous(false);
   };
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      const fetchedPosts = await fetchPosts(selectedCategory);
+      setPosts(fetchedPosts);
+    };
+    loadPosts();
+  }, [selectedCategory]);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-muted/30">
@@ -48,6 +65,10 @@ function CommunityPage() {
           <Composer
             value={newPostContent}
             onChange={setNewPostContent}
+            title={newPostTitle}
+            onTitleChange={setNewPostTitle}
+            anonymous={isAnonymous}
+            onToggleAnonymous={() => setIsAnonymous((v) => !v)}
             onSubmit={handleCreatePost}
           />
 
@@ -55,7 +76,7 @@ function CommunityPage() {
 
           {/* 게시글 리스트 */}
           <section className="space-y-4">
-            {filteredPosts.map((post) => (
+            {posts.map((post) => (
               <PostCard
                 key={post.id}
                 post={post}
@@ -65,7 +86,7 @@ function CommunityPage() {
               />
             ))}
 
-            {filteredPosts.length === 0 && (
+            {posts.length === 0 && (
               <div className="py-16 text-center text-sm text-muted-foreground">
                 아직 이 카테고리에 글이 없어요. 첫 글의 주인공이 되어 주세요! ✨
               </div>

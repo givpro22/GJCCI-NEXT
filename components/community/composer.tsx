@@ -11,15 +11,24 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 export default function Composer({
   value,
   onChange,
   onSubmit,
+  title,
+  onTitleChange,
+  anonymous,
+  onToggleAnonymous,
 }: {
   value: string;
   onChange: (v: string) => void;
   onSubmit: () => void;
+  title: string;
+  onTitleChange: (v: string) => void;
+  anonymous: boolean;
+  onToggleAnonymous: () => void;
 }) {
   return (
     <Card>
@@ -36,12 +45,23 @@ export default function Composer({
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        <input
+          type="text"
+          placeholder="제목을 입력해주세요"
+          value={title}
+          onChange={(e) => onTitleChange(e.target.value)}
+          className="w-full rounded-md border px-3 py-2 text-sm"
+        />
         <Textarea
           placeholder="커뮤니티에 공유할 내용을 입력해 주세요."
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="min-h-[90px] resize-none"
         />
+        <div className="flex items-center gap-2 text-sm pt-1">
+          <Switch checked={anonymous} onCheckedChange={onToggleAnonymous} />
+          <span>익명으로 작성하기</span>
+        </div>
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <Badge variant="outline">텍스트</Badge>

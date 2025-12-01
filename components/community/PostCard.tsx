@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ThumbsUp, MessageCircle } from "lucide-react";
 
 type Post = {
   id: number;
@@ -63,13 +64,13 @@ export default function PostCard({
             type="button"
             className="inline-flex items-center gap-1 hover:text-primary"
           >
-            👍 좋아요 {post.likes}
+            <ThumbsUp className="h-4 w-4" /> 좋아요 {post.likes}
           </button>
           <button
             type="button"
             className="inline-flex items-center gap-1 hover:text-primary"
           >
-            💬 댓글 {post.comments}
+            <MessageCircle className="h-4 w-4" /> 댓글 {post.comments}
           </button>
         </div>
       </CardContent>
