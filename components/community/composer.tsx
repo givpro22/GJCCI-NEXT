@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "../ui/input";
 
 export default function Composer({
   value,
@@ -45,12 +46,11 @@ export default function Composer({
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <input
+        <Input
           type="text"
           placeholder="제목을 입력해주세요"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
-          className="w-full rounded-md border px-3 py-2 text-sm"
         />
         <Textarea
           placeholder="커뮤니티에 공유할 내용을 입력해 주세요."

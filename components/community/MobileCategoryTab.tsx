@@ -16,7 +16,7 @@ export function MobileCategoryTab({
     <div className="lg:hidden">
       <div className="mb-3 text-sm font-semibold">카테고리</div>
       <div className="flex flex-wrap gap-2">
-        {CATEGORIES.map((category) => (
+        {categories.map((category) => (
           <Button
             key={category.id}
             size="sm"

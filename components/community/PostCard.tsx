@@ -11,18 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ThumbsUp, MessageCircle } from "lucide-react";
-
-type Post = {
-  id: number;
-  author: string;
-  avatar?: string;
-  category: string;
-  title: string;
-  content: string;
-  createdAt: string;
-  likes: number;
-  comments: number;
-};
+import { Post } from "@/lib/definitions";
 
 export default function PostCard({
   post,
