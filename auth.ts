@@ -31,7 +31,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           email,
           password,
         });
-
+        console.log(data.user);
         if (error || !data.user) {
           console.log("supabase auth fail", error);
           return null;
@@ -43,6 +43,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         return {
           id: supaUser.id,
           email: supaUser.email,
+          name: supaUser.user_metadata.name,
         };
       },
     }),

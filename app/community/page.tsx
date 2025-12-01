@@ -9,6 +9,7 @@ import { MOCK_POSTS } from "@/constants/data";
 import { MobileCategoryTab } from "@/components/community/MobileCategoryTab";
 import Composer from "@/components/community/composer";
 import { createPost, fetchPosts } from "@/lib/supabase";
+import { useSession } from "next-auth/react";
 
 function CommunityPage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>("all");
@@ -16,11 +17,12 @@ function CommunityPage() {
   const [posts, setPosts] = useState<Post[]>(MOCK_POSTS);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const { data: session } = useSession();
 
   const handleCreatePost = async () => {
     if (!newPostContent.trim()) return;
     await createPost({
-      author: isAnonymous ? "익명" : "관리자",
+      author: isAnonymous ? "익명" : session?.user?.name || "Unknown",
       category: selectedCategory,
       title: newPostTitle,
       content: newPostContent,
