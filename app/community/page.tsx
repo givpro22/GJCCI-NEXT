@@ -5,7 +5,6 @@ import PostCard from "@/components/community/PostCard";
 import { Separator } from "@/components/ui/separator";
 import { CategorySidebar } from "@/components/community/CategorySidebar";
 import { CATEGORIES, CategoryId, Post } from "@/lib/definitions";
-import { MOCK_POSTS } from "@/constants/data";
 import { MobileCategoryTab } from "@/components/community/MobileCategoryTab";
 import Composer from "@/components/community/composer";
 import { createPost, fetchPosts } from "@/lib/supabase";
@@ -14,7 +13,7 @@ import { useSession } from "next-auth/react";
 function CommunityPage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>("all");
   const [newPostContent, setNewPostContent] = useState("");
-  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const { data: session } = useSession();
