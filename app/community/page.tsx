@@ -9,6 +9,7 @@ import { MobileCategoryTab } from "@/components/community/MobileCategoryTab";
 import Composer from "@/components/community/composer";
 import { createPost, fetchPosts } from "@/lib/supabase";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 function CommunityPage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>("all");
@@ -19,27 +20,42 @@ function CommunityPage() {
   const { data: session } = useSession();
 
   const handleCreatePost = async () => {
-    if (!newPostContent.trim()) return;
-    await createPost({
-      author: isAnonymous ? "익명" : session?.user?.name || "Unknown",
-      category: selectedCategory,
-      title: newPostTitle,
-      content: newPostContent,
-      likes: 0,
-      comments: 0,
-    });
-    const updated = await fetchPosts(selectedCategory);
-    setPosts(updated);
-    setNewPostContent("");
-    setNewPostTitle("");
-    setIsAnonymous(false);
+    if (!newPostContent.trim() || !newPostTitle.trim()) return;
+    try {
+      await createPost({
+        author: isAnonymous ? "익명" : session?.user?.name || "Unknown",
+        category: selectedCategory,
+        title: newPostTitle,
+        content: newPostContent,
+        likes: 0,
+        comments: 0,
+      });
+      const updated = await fetchPosts(selectedCategory);
+      setPosts(updated);
+      setNewPostContent("");
+      setNewPostTitle("");
+      setIsAnonymous(false);
+    } catch (error) {
+      console.error("Failed to create post:", error);
+      toast.error(
+        "게시글 작성 중 오류가 발생했어요. 잠시 후 다시 시도해주세요."
+      );
+    }
   };
 
   useEffect(() => {
     const loadPosts = async () => {
-      const fetchedPosts = await fetchPosts(selectedCategory);
-      setPosts(fetchedPosts);
+      try {
+        const fetchedPosts = await fetchPosts(selectedCategory);
+        setPosts(fetchedPosts);
+      } catch (error) {
+        console.error("Failed to load posts:", error);
+        toast.error(
+          "게시글을 불러오는 중 오류가 발생했어요. 잠시 후 다시 시도해주세요."
+        );
+      }
     };
+
     loadPosts();
   }, [selectedCategory]);
 
