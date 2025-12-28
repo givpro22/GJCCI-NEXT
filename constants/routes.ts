@@ -6,6 +6,7 @@ export const ROUTES = {
   COMMUNITY: "/community",
   SCHEDULER: "/exam-schedule",
   MY_PROFILE: "/my/profile",
+  ADMIN: "/admin",
   POST: {
     ROOT: "/posts",
     DETAIL: (id: string | number) => `/posts/${id}`,

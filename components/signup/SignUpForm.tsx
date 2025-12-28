@@ -15,6 +15,7 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui";
 import { createClientSideSupabaseClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 const signUpSchema = z
   .object({
@@ -36,6 +37,7 @@ export type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 export async function signPost(values: SignUpFormValues) {
   const supabase = createClientSideSupabaseClient();
+
   const { data, error } = await supabase.auth.signUp({
     email: values.email,
     password: values.password,
@@ -49,6 +51,7 @@ export async function signPost(values: SignUpFormValues) {
 }
 
 export function SignUpForm() {
+  const router = useRouter();
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -62,6 +65,7 @@ export function SignUpForm() {
   async function onSubmit(values: SignUpFormValues) {
     try {
       await signPost(values);
+      router.replace("/");
     } catch (error) {
       throw error;
     }

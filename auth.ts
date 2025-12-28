@@ -31,19 +31,27 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           email,
           password,
         });
-        console.log(data.user);
         if (error || !data.user) {
           console.log("supabase auth fail", error);
           return null;
         }
 
         const supaUser = data.user;
+        const { data: profile, error: profileError } = await supabase
+          .from("users")
+          .select("role, status")
+          .eq("id", supaUser.id)
+          .single();
 
+        if (profileError || profile.status !== "approved") {
+          return null; // 승인 안 된 유저
+        }
         // NextAuth에 넘겨줄 user 객체
         return {
           id: supaUser.id,
           email: supaUser.email,
           name: supaUser.user_metadata.name,
+          role: profile.role,
         };
       },
     }),
@@ -51,9 +59,11 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       // authorize()가 user를 반환했을 때
+
       if (user) {
         token.id = user.id;
         token.email = user.email;
+        token.role = user.role;
       }
       return token;
     },
@@ -63,6 +73,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       if (session.user) {
         session.user.id = token.id;
         session.user.email = token.email;
+        session.user.role = token.role;
       }
       return session;
     },
