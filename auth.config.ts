@@ -10,7 +10,6 @@ export const authConfig = {
     authorized({ auth, request: { nextUrl } }) {
       const pathname = nextUrl.pathname;
       const isLoggedIn = !!auth?.user;
-      const role = auth?.user?.role;
 
       if (matchRoute(pathname, routeRules.guestOnly)) {
         return isLoggedIn ? Response.redirect(new URL("/", nextUrl)) : true;
@@ -21,7 +20,7 @@ export const authConfig = {
       }
 
       if (matchRoute(pathname, routeRules.adminOnly)) {
-        return isLoggedIn && role === "ADMIN";
+        return isLoggedIn;
       }
 
       return true;

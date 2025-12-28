@@ -28,10 +28,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function AdminPage() {
   const supabase = await createClient();
-
+  const session = await auth();
+  if (session?.user.role !== "admin") redirect("/");
   const { data: users } = await supabase
     .from("users")
     .select("id, name, email, role, status");

@@ -65,6 +65,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         token.email = user.email;
         token.role = user.role;
       }
+
       return token;
     },
 
@@ -75,6 +76,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         session.user.email = token.email;
         session.user.role = token.role;
       }
+
       return session;
     },
   },
