@@ -14,6 +14,13 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { createClientSideSupabaseClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -26,6 +33,9 @@ const signUpSchema = z
       .min(6, { message: "비밀번호는 최소 6자 이상이어야 합니다." }),
     confirmPassword: z.string().min(6, {
       message: "비밀번호 확인도 최소 6자 이상이어야 합니다.",
+    }),
+    role: z.enum(["main_director", "sub_director"], {
+      message: "역할을 선택해주세요.",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -44,6 +54,7 @@ export async function signPost(values: SignUpFormValues) {
     options: {
       data: {
         name: values.name,
+        role: values.role,
       },
     },
   });
@@ -59,6 +70,7 @@ export function SignUpForm() {
       email: "",
       password: "",
       confirmPassword: "",
+      role: "sub_director",
     },
   });
 
@@ -140,6 +152,31 @@ export function SignUpForm() {
               </FormControl>
               <FormDescription>
                 비밀번호를 한 번 더 입력해주세요.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="role"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>역할</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="역할을 선택해주세요" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="main_director">정감독</SelectItem>
+                  <SelectItem value="sub_director">부감독</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                가입 후 관리자의 승인이 필요합니다.
               </FormDescription>
               <FormMessage />
             </FormItem>

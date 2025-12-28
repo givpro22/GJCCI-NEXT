@@ -18,3 +18,10 @@ export const ROUTES = {
     DETAIL: (id: string | number) => `/users/${id}`,
   },
 } as const;
+
+export const routeRules = {
+  public: ["/"],
+  authOnly: ["/dashboard", "/community", "/exam-schedule"],
+  guestOnly: ["/login", "/signup"],
+  adminOnly: ["/admin"],
+};
