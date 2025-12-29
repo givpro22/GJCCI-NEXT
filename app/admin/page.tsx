@@ -68,7 +68,13 @@ export default async function AdminPage() {
                 <form
                   action={async (formData) => {
                     "use server";
-                    await updateUserRole(user.id, formData.get("role") as any);
+                    await updateUserRole(
+                      user.id,
+                      formData.get("role") as
+                        | "admin"
+                        | "main_director"
+                        | "sub_director"
+                    );
                   }}
                   className="flex items-center gap-2"
                 >
