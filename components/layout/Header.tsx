@@ -23,7 +23,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Header() {
   const { data: session, status } = useSession();
-
   return (
     <header className="sticky top-0 z-50 bg-gray-100">
       <div className=" flex h-16 items-center justify-between px-20 ">
@@ -96,6 +95,15 @@ export function Header() {
                 )}
               </NavigationMenuItem>
 
+              {session?.user?.role === "admin" && (
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <Link href={ROUTES.ADMIN} className="px-4 py-2">
+                      관리자
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              )}
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link href={ROUTES.SCHEDULER} className="px-4 py-2">

@@ -1,4 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
+import { matchRoute } from "./utils/auth.utils";
+import { routeRules } from "./constants/routes";
 
 export const authConfig = {
   pages: {
@@ -6,26 +8,19 @@ export const authConfig = {
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
+      const pathname = nextUrl.pathname;
       const isLoggedIn = !!auth?.user;
 
-      const pathname = nextUrl.pathname;
-
-      const isAuthPage = pathname === "/login" || pathname === "/signup";
-      // const isHomePage = pathname === "/";
-      const isDashboard = pathname.startsWith("/dashboard");
-
-      if (isAuthPage) {
-        if (isLoggedIn) {
-          return Response.redirect(new URL("/", nextUrl));
-        }
-        return true;
+      if (matchRoute(pathname, routeRules.guestOnly)) {
+        return isLoggedIn ? Response.redirect(new URL("/", nextUrl)) : true;
       }
 
-      if (isDashboard) {
-        if (!isLoggedIn) {
-          return false;
-        }
-        return true;
+      if (matchRoute(pathname, routeRules.authOnly)) {
+        return isLoggedIn;
+      }
+
+      if (matchRoute(pathname, routeRules.adminOnly)) {
+        return isLoggedIn;
       }
 
       return true;

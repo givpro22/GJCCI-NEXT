@@ -6,6 +6,7 @@ export const ROUTES = {
   COMMUNITY: "/community",
   SCHEDULER: "/exam-schedule",
   MY_PROFILE: "/my/profile",
+  ADMIN: "/admin",
   POST: {
     ROOT: "/posts",
     DETAIL: (id: string | number) => `/posts/${id}`,
@@ -17,3 +18,10 @@ export const ROUTES = {
     DETAIL: (id: string | number) => `/users/${id}`,
   },
 } as const;
+
+export const routeRules = {
+  public: ["/"],
+  authOnly: ["/dashboard", "/community", "/exam-schedule"],
+  guestOnly: ["/login", "/signup"],
+  adminOnly: ["/admin"],
+};
