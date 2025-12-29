@@ -21,10 +21,8 @@ export async function approveUser(userId: string) {
     if (error) throw error;
 
     revalidatePath("/admin");
-    return { success: true };
   } catch (error) {
     console.error("approveUser Error:", error);
-    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -45,10 +43,8 @@ export async function rejectUser(userId: string) {
     if (error) throw error;
 
     revalidatePath("/admin");
-    return { success: true };
   } catch (error) {
     console.error("rejectUser Error:", error);
-    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -72,7 +68,6 @@ export async function updateUserRole(
     if (error) throw error;
 
     revalidatePath("/admin");
-    return { success: true };
   } catch (error) {
     console.error("updateUserRole Error:", error);
     return { success: false, error: (error as Error).message };
@@ -93,9 +88,7 @@ export async function deleteUser(userId: string) {
     if (error) throw error;
 
     revalidatePath("/admin");
-    return { success: true };
   } catch (error) {
     console.error("deleteUser Error:", error);
-    return { success: false, error: (error as Error).message };
   }
 }
