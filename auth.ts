@@ -43,8 +43,8 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           .eq("id", supaUser.id)
           .single();
 
-        if (profileError || profile.status !== "approved") {
-          return null; // 승인 안 된 유저
+        if (profileError || !profile || profile.status !== "approved") {
+          return null; // 승인 안 된 유저 또는 프로필 없음
         }
         // NextAuth에 넘겨줄 user 객체
         return {
