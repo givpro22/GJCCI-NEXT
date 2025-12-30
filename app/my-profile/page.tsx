@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 export default function MyProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -38,9 +39,13 @@ export default function MyProfilePage() {
 
   const handleSave = () => {
     startTransition(async () => {
-      await updateMyProfile({ name });
-      setIsEditing(false);
-      await update();
+      try {
+        await updateMyProfile({ name });
+        setIsEditing(false);
+        await update();
+      } catch (error) {
+        toast.error("프로필 업데이트에 실패했습니다.");
+      }
     });
   };
 
