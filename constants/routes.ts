@@ -5,7 +5,7 @@ export const ROUTES = {
   SIGNUP: "/signup",
   COMMUNITY: "/community",
   SCHEDULER: "/exam-schedule",
-  MY_PROFILE: "/my/profile",
+  MY_PROFILE: "/my-profile",
   ADMIN: "/admin",
   POST: {
     ROOT: "/posts",
