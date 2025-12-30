@@ -30,6 +30,7 @@ export default function MyProfilePage() {
         setRole(role);
       } catch (err) {
         console.error("프로필 조회 실패", err);
+        toast.error("프로필 조회에 실패했습니다.");
       }
     };
     fetchProfile();
