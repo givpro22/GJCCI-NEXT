@@ -34,6 +34,7 @@ export default function ExamSchedulePage() {
     setLoading(true);
     const supabase = createClientSideSupabaseClient();
     const bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET!;
+
     const urls: string[] = [];
 
     // 모든 기간 폴더 조회
@@ -68,12 +69,13 @@ export default function ExamSchedulePage() {
       if (!files) continue;
 
       files.forEach((file) => {
-        urls.push(
-          supabase.storage
-            .from(bucket)
-            .getPublicUrl(`exam-images/${folder.name}/${file.name}`).data
-            .publicUrl
-        );
+        const { data } = supabase.storage
+          .from(bucket)
+          .getPublicUrl(`exam-images/${folder.name}/${file.name}`);
+
+        if (data?.publicUrl) {
+          urls.push(data.publicUrl);
+        }
       });
     }
 
