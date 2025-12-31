@@ -24,10 +24,7 @@ import { DateRange } from "react-day-picker";
 export default function ExamSchedulePage() {
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(),
-    to: new Date(),
-  });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [open, setOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
@@ -85,6 +82,19 @@ export default function ExamSchedulePage() {
   };
 
   useEffect(() => {
+    const today = new Date();
+
+    const start = new Date(today);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(today);
+    end.setHours(23, 59, 59, 999);
+
+    setDateRange({ from: start, to: end });
+  }, []);
+
+  useEffect(() => {
+    if (!dateRange?.from || !dateRange?.to) return;
     fetchImages();
   }, [dateRange]);
 
@@ -128,7 +138,6 @@ export default function ExamSchedulePage() {
               mode="range"
               selected={dateRange}
               onSelect={setDateRange}
-              initialFocus
             />
           </PopoverContent>
         </Popover>
