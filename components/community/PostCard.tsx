@@ -1,6 +1,10 @@
 "use client";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/ko";
 
-import React from "react";
+dayjs.extend(relativeTime);
+dayjs.locale("ko");
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
@@ -20,6 +24,7 @@ export default function PostCard({
   post: Post;
   categoryLabel?: string;
 }) {
+  console.log("Rendering PostCard for post:", post);
   return (
     <Card className="border-border/70">
       <CardHeader className="flex flex-row items-start gap-3 space-y-0">
@@ -39,7 +44,7 @@ export default function PostCard({
             )}
           </div>
           <CardDescription className="text-xs">
-            {post.createdAt}
+            {dayjs(post.created_at).fromNow()}{" "}
           </CardDescription>
           <div className="mt-1 text-sm font-medium">{post.title}</div>
         </div>

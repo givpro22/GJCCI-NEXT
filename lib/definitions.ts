@@ -12,7 +12,7 @@ export type Post = {
   category: CategoryId;
   title: string;
   content: string;
-  createdAt: string;
+  created_at: string;
   likes: number;
   comments: number;
 };
@@ -22,7 +22,6 @@ export const CATEGORIES = [
   { id: "notice", label: "공지" },
   { id: "free", label: "자유" },
   { id: "error", label: "오류" },
-  { id: "subproctor-only", label: "부감독 전용" },
 ];
 
 export type CategoryId = (typeof CATEGORIES)[number]["id"];

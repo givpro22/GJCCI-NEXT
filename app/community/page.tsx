@@ -10,31 +10,40 @@ import Composer from "@/components/community/composer";
 import { createPost, fetchPosts } from "@/lib/supabase";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 function CommunityPage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>("all");
+  const [writeCategory, setWriteCategory] = useState<CategoryId>("notice");
   const [newPostContent, setNewPostContent] = useState("");
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const { data: session } = useSession();
 
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 5;
+
   const handleCreatePost = async () => {
     if (!newPostContent.trim() || !newPostTitle.trim()) return;
     try {
       await createPost({
         author: isAnonymous ? "익명" : session?.user?.name || "Unknown",
-        category: selectedCategory,
+        category: writeCategory,
         title: newPostTitle,
         content: newPostContent,
         likes: 0,
         comments: 0,
       });
-      const updated = await fetchPosts(selectedCategory);
+      const updated =
+        selectedCategory === "all"
+          ? await fetchPosts()
+          : await fetchPosts(selectedCategory);
       setPosts(updated);
       setNewPostContent("");
       setNewPostTitle("");
       setIsAnonymous(false);
+      setWriteCategory("notice");
     } catch (error) {
       console.error("Failed to create post:", error);
       toast.error(
@@ -46,7 +55,10 @@ function CommunityPage() {
   useEffect(() => {
     const loadPosts = async () => {
       try {
-        const fetchedPosts = await fetchPosts(selectedCategory);
+        const fetchedPosts =
+          selectedCategory === "all"
+            ? await fetchPosts()
+            : await fetchPosts(selectedCategory);
         setPosts(fetchedPosts);
       } catch (error) {
         console.error("Failed to load posts:", error);
@@ -58,6 +70,12 @@ function CommunityPage() {
 
     loadPosts();
   }, [selectedCategory]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [selectedCategory]);
+
+  const paginatedPosts = posts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-muted/30">
@@ -84,6 +102,8 @@ function CommunityPage() {
             onChange={setNewPostContent}
             title={newPostTitle}
             onTitleChange={setNewPostTitle}
+            category={writeCategory}
+            onCategoryChange={setWriteCategory}
             anonymous={isAnonymous}
             onToggleAnonymous={() => setIsAnonymous((v) => !v)}
             onSubmit={handleCreatePost}
@@ -93,7 +113,7 @@ function CommunityPage() {
 
           {/* 게시글 리스트 */}
           <section className="space-y-4">
-            {posts.map((post) => (
+            {paginatedPosts.map((post) => (
               <PostCard
                 key={post.id}
                 post={post}
@@ -109,6 +129,32 @@ function CommunityPage() {
               </div>
             )}
           </section>
+
+          {posts.length > PAGE_SIZE && (
+            <div className="flex justify-center gap-2 pt-6">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                이전
+              </Button>
+
+              <span className="text-sm flex items-center">
+                {page} / {Math.ceil(posts.length / PAGE_SIZE)}
+              </span>
+
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === Math.ceil(posts.length / PAGE_SIZE)}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                다음
+              </Button>
+            </div>
+          )}
         </main>
       </div>
     </div>
