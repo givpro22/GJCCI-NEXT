@@ -20,6 +20,7 @@ import {
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
+import { toast } from "sonner";
 
 export default function ExamSchedulePage() {
   const [images, setImages] = useState<string[]>([]);
@@ -81,6 +82,40 @@ export default function ExamSchedulePage() {
 
     setImages(urls);
     setLoading(false);
+  };
+
+  const handleDeleteImage = async () => {
+    if (!previewImage) return;
+
+    const supabase = createClientSideSupabaseClient();
+    const bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET!;
+
+    try {
+      // publicUrl 에서 storage 경로 추출
+      const url = new URL(previewImage);
+      const pathname = url.pathname;
+      // /storage/v1/object/public/{bucket}/exam-images/xxx/yyy.png
+      const idx = pathname.indexOf(`/${bucket}/`);
+      if (idx === -1) return;
+
+      const filePath = pathname.substring(idx + bucket.length + 2); // exam-images/...
+
+      const { error } = await supabase.storage.from(bucket).remove([filePath]);
+
+      if (error) {
+        console.error(error);
+        toast.error("이미지 삭제에 실패했습니다.");
+        return;
+      }
+      toast.info("이미지가 삭제되었습니다.");
+
+      // UI 갱신
+      setPreviewImage(null);
+      fetchImages();
+    } catch (e) {
+      console.error(e);
+      toast.error("이미지 삭제 중 오류가 발생했습니다.");
+    }
   };
 
   useEffect(() => {
@@ -169,6 +204,11 @@ export default function ExamSchedulePage() {
           <DialogHeader>
             <DialogTitle>일정표 미리보기</DialogTitle>
           </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="destructive" onClick={handleDeleteImage}>
+              삭제
+            </Button>
+          </div>
 
           <div className="max-h-[80vh] overflow-auto flex justify-center">
             {previewImage && (
