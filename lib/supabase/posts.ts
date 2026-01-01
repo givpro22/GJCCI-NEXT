@@ -5,7 +5,7 @@ const supabase = createClientSideSupabaseClient();
 
 type CreatePost = {
   author_id: string;
-  author_name: string;
+  author_name: string | undefined;
   category: CategoryId;
   title: string;
   content: string;

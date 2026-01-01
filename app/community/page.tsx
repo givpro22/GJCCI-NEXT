@@ -11,6 +11,7 @@ import { createPost, fetchPosts } from "@/lib/supabase";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { z } from "zod";
 
 function CommunityPage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>("all");
@@ -26,28 +27,58 @@ function CommunityPage() {
 
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
 
+  const createPostSchema = z.object({
+    session: z.object({
+      user: z.object({
+        id: z.string(),
+        name: z.string().optional(),
+      }),
+    }),
+    title: z.string().min(1),
+    content: z.string().min(1),
+    category: z.string(),
+    anonymous: z.boolean(),
+  });
+
   const handleCreatePost = async () => {
-    if (!newPostContent.trim() || !newPostTitle.trim()) return;
+    const parsed = createPostSchema.safeParse({
+      session,
+      title: newPostTitle,
+      content: newPostContent,
+      category: writeCategory,
+      anonymous: isAnonymous,
+    });
+
+    if (!parsed.success) {
+      toast.info("로그인이 필요하거나 입력값이 올바르지 않습니다.");
+      return;
+    }
+
+    const { user } = parsed.data.session;
+
     try {
       await createPost({
-        author_id: session?.user?.id,
-        author_name: isAnonymous ? "익명" : session?.user?.name,
+        author_id: user.id,
+        author_name: parsed.data.anonymous ? "익명" : user.name,
         category: writeCategory,
         title: newPostTitle,
         content: newPostContent,
         likes: 0,
         comments: 0,
       });
+
       const updated =
         selectedCategory === "all"
           ? await fetchPosts()
           : await fetchPosts(selectedCategory);
+
       setPosts(updated);
       setNewPostContent("");
       setNewPostTitle("");
       setIsAnonymous(false);
       setWriteCategory("notice");
       setIsWriteModalOpen(false);
+
       toast.success("게시글이 성공적으로 작성되었어요!");
     } catch (error) {
       console.error("Failed to create post:", error);
