@@ -23,6 +23,7 @@ function CommunityPage() {
   const { data: session } = useSession();
 
   const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const PAGE_SIZE = 5;
 
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
@@ -56,6 +57,27 @@ function CommunityPage() {
 
     const { user } = parsed.data.session;
 
+    const optimisticPost: Post = {
+      id: Number(Date.now()),
+      author_id: user.id,
+      author_name: parsed.data.anonymous ? "익명" : user.name ?? "",
+      category: writeCategory,
+      title: newPostTitle,
+      content: newPostContent,
+      likes: 0,
+      comments: 0,
+      created_at: new Date().toISOString(),
+    };
+
+    setPosts((prev) => [optimisticPost, ...prev]);
+    setTotalCount((prev) => prev + 1);
+
+    setNewPostContent("");
+    setNewPostTitle("");
+    setIsAnonymous(false);
+    setWriteCategory("notice");
+    setIsWriteModalOpen(false);
+
     try {
       await createPost({
         author_id: user.id,
@@ -67,21 +89,11 @@ function CommunityPage() {
         comments: 0,
       });
 
-      const updated =
-        selectedCategory === "all"
-          ? await fetchPosts()
-          : await fetchPosts(selectedCategory);
-
-      setPosts(updated);
-      setNewPostContent("");
-      setNewPostTitle("");
-      setIsAnonymous(false);
-      setWriteCategory("notice");
-      setIsWriteModalOpen(false);
-
+      setPage(1);
       toast.success("게시글이 성공적으로 작성되었어요!");
     } catch (error) {
-      console.error("Failed to create post:", error);
+      setPosts((prev) => prev.filter((p) => p.id !== optimisticPost.id));
+      setTotalCount((prev) => Math.max(0, prev - 1));
       toast.error(
         "게시글 작성 중 오류가 발생했어요. 잠시 후 다시 시도해주세요."
       );
@@ -91,26 +103,25 @@ function CommunityPage() {
   useEffect(() => {
     const loadPosts = async () => {
       try {
-        const fetchedPosts =
-          selectedCategory === "all"
-            ? await fetchPosts()
-            : await fetchPosts(selectedCategory);
-        setPosts(fetchedPosts);
-      } catch (error) {
-        toast.error(
-          "게시글을 불러오는 중 오류가 발생했어요. 잠시 후 다시 시도해주세요."
-        );
+        const { posts, totalCount } = await fetchPosts({
+          page,
+          pageSize: PAGE_SIZE,
+          category: selectedCategory,
+        });
+
+        setPosts(posts);
+        setTotalCount(totalCount);
+      } catch {
+        toast.error("게시글을 불러오는 중 오류가 발생했어요.");
       }
     };
 
     loadPosts();
-  }, [selectedCategory]);
+  }, [page, selectedCategory]);
 
   useEffect(() => {
     setPage(1);
   }, [selectedCategory]);
-
-  const paginatedPosts = posts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-muted/30">
@@ -150,7 +161,7 @@ function CommunityPage() {
 
           {/* 게시글 리스트 */}
           <section className="space-y-4">
-            {paginatedPosts.map((post) => (
+            {posts.map((post) => (
               <PostCard
                 key={post.id}
                 post={post}
@@ -170,7 +181,7 @@ function CommunityPage() {
             )}
           </section>
 
-          {posts.length > PAGE_SIZE && (
+          {totalCount > PAGE_SIZE && (
             <div className="flex justify-center gap-2 pt-6">
               <Button
                 variant="outline"
@@ -182,13 +193,13 @@ function CommunityPage() {
               </Button>
 
               <span className="text-sm flex items-center">
-                {page} / {Math.ceil(posts.length / PAGE_SIZE)}
+                {page} / {Math.ceil(totalCount / PAGE_SIZE)}
               </span>
 
               <Button
                 variant="outline"
                 size="sm"
-                disabled={page === Math.ceil(posts.length / PAGE_SIZE)}
+                disabled={page === Math.ceil(totalCount / PAGE_SIZE)}
                 onClick={() => setPage((p) => p + 1)}
               >
                 다음
