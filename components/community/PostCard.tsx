@@ -54,7 +54,7 @@ export default function PostCard({
           {post.content}
         </p>
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <button
+          {/* <button
             type="button"
             className="inline-flex items-center gap-1 hover:text-primary"
           >
@@ -65,7 +65,7 @@ export default function PostCard({
             className="inline-flex items-center gap-1 hover:text-primary"
           >
             <MessageCircle className="h-4 w-4" /> 댓글 {post.comments}
-          </button>
+          </button> */}
         </div>
       </CardContent>
     </Card>

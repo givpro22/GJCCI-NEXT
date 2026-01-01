@@ -24,6 +24,8 @@ function CommunityPage() {
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 5;
 
+  const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
+
   const handleCreatePost = async () => {
     if (!newPostContent.trim() || !newPostTitle.trim()) return;
     try {
@@ -44,6 +46,8 @@ function CommunityPage() {
       setNewPostTitle("");
       setIsAnonymous(false);
       setWriteCategory("notice");
+      setIsWriteModalOpen(false);
+      toast.success("게시글이 성공적으로 작성되었어요!");
     } catch (error) {
       console.error("Failed to create post:", error);
       toast.error(
@@ -107,6 +111,8 @@ function CommunityPage() {
             anonymous={isAnonymous}
             onToggleAnonymous={() => setIsAnonymous((v) => !v)}
             onSubmit={handleCreatePost}
+            open={isWriteModalOpen}
+            onOpenChange={setIsWriteModalOpen}
           />
 
           <Separator />

@@ -30,6 +30,8 @@ export default function Composer({
   onToggleAnonymous,
   category,
   onCategoryChange,
+  open,
+  onOpenChange,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -40,9 +42,11 @@ export default function Composer({
   onToggleAnonymous: () => void;
   category: CategoryId;
   onCategoryChange: (v: CategoryId) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button>글 작성하기</Button>
       </DialogTrigger>
