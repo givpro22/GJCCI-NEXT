@@ -7,14 +7,15 @@ export type User = {
 
 export type Post = {
   id: number;
-  author: string;
-  avatar?: string;
+  avatar?: string; // 임시로
+  author_id: string;
+  author_name: string;
   category: CategoryId;
   title: string;
   content: string;
-  created_at: string;
   likes: number;
   comments: number;
+  created_at: string;
 };
 
 export const CATEGORIES = [

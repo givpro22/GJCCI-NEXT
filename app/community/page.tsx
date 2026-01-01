@@ -30,7 +30,8 @@ function CommunityPage() {
     if (!newPostContent.trim() || !newPostTitle.trim()) return;
     try {
       await createPost({
-        author: isAnonymous ? "익명" : session?.user?.name || "Unknown",
+        author_id: session?.user?.id,
+        author_name: isAnonymous ? "익명" : session?.user?.name,
         category: writeCategory,
         title: newPostTitle,
         content: newPostContent,
@@ -65,7 +66,6 @@ function CommunityPage() {
             : await fetchPosts(selectedCategory);
         setPosts(fetchedPosts);
       } catch (error) {
-        console.error("Failed to load posts:", error);
         toast.error(
           "게시글을 불러오는 중 오류가 발생했어요. 잠시 후 다시 시도해주세요."
         );
@@ -125,6 +125,9 @@ function CommunityPage() {
                 post={post}
                 categoryLabel={
                   CATEGORIES.find((c) => c.id === post.category)?.label
+                }
+                onDelete={(deletedId) =>
+                  setPosts((prev) => prev.filter((p) => p.id !== deletedId))
                 }
               />
             ))}
