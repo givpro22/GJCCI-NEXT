@@ -3,8 +3,9 @@ import { CategoryId } from "../definitions";
 
 const supabase = createClientSideSupabaseClient();
 
-type CreatePost = {
-  author: string;
+export type CreatePost = {
+  author_id: string;
+  author_name: string | undefined;
   category: CategoryId;
   title: string;
   content: string;
@@ -12,22 +13,44 @@ type CreatePost = {
   comments: number;
 };
 
-export async function fetchPosts(category?: string) {
-  let query = supabase.from("posts").select("*");
+export async function fetchPosts({
+  page,
+  pageSize,
+  category,
+}: {
+  page: number;
+  pageSize: number;
+  category?: CategoryId | "all";
+}) {
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
-  if (category && category !== "all") query = query.eq("category", category);
+  let query = supabase
+    .from("posts")
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
-  const { data, error } = await query.order("created_at", { ascending: false });
+  if (category && category !== "all") {
+    query = query.eq("category", category);
+  }
+
+  const { data, count, error } = await query;
 
   if (error) throw error;
-  return data;
+
+  return {
+    posts: data ?? [],
+    totalCount: count ?? 0,
+  };
 }
 
 export async function createPost(newPost: CreatePost) {
   const { data, error } = await supabase
     .from("posts")
     .insert({
-      author: newPost.author,
+      author_id: newPost.author_id,
+      author_name: newPost.author_name,
       category: newPost.category,
       title: newPost.title,
       content: newPost.content,
@@ -38,4 +61,10 @@ export async function createPost(newPost: CreatePost) {
 
   if (error) throw error;
   return data;
+}
+
+export async function deletePost(postId: number) {
+  const { error } = await supabase.from("posts").delete().eq("id", postId);
+
+  if (error) throw error;
 }

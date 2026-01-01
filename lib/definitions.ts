@@ -7,14 +7,15 @@ export type User = {
 
 export type Post = {
   id: number;
-  author: string;
-  avatar?: string;
+  avatar?: string; // 임시로
+  author_id: string;
+  author_name: string;
   category: CategoryId;
   title: string;
   content: string;
-  createdAt: string;
   likes: number;
   comments: number;
+  created_at: string;
 };
 
 export const CATEGORIES = [
@@ -22,7 +23,6 @@ export const CATEGORIES = [
   { id: "notice", label: "공지" },
   { id: "free", label: "자유" },
   { id: "error", label: "오류" },
-  { id: "subproctor-only", label: "부감독 전용" },
 ];
 
 export type CategoryId = (typeof CATEGORIES)[number]["id"];

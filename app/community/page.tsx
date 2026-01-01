@@ -1,118 +1,96 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import PostCard from "@/components/community/PostCard";
 import { Separator } from "@/components/ui/separator";
 import { CategorySidebar } from "@/components/community/CategorySidebar";
-import { CATEGORIES, CategoryId, Post } from "@/lib/definitions";
+import { CATEGORIES } from "@/lib/definitions";
 import { MobileCategoryTab } from "@/components/community/MobileCategoryTab";
 import Composer from "@/components/community/composer";
-import { createPost, fetchPosts } from "@/lib/supabase";
-import { useSession } from "next-auth/react";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useCommunityPage } from "@/components/community/hook/useCommunityPage";
+import { PAGE_SIZE } from "@/constants/constants";
 
-function CommunityPage() {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryId>("all");
-  const [newPostContent, setNewPostContent] = useState("");
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [newPostTitle, setNewPostTitle] = useState("");
-  const [isAnonymous, setIsAnonymous] = useState(false);
-  const { data: session } = useSession();
-
-  const handleCreatePost = async () => {
-    if (!newPostContent.trim() || !newPostTitle.trim()) return;
-    try {
-      await createPost({
-        author: isAnonymous ? "익명" : session?.user?.name || "Unknown",
-        category: selectedCategory,
-        title: newPostTitle,
-        content: newPostContent,
-        likes: 0,
-        comments: 0,
-      });
-      const updated = await fetchPosts(selectedCategory);
-      setPosts(updated);
-      setNewPostContent("");
-      setNewPostTitle("");
-      setIsAnonymous(false);
-    } catch (error) {
-      console.error("Failed to create post:", error);
-      toast.error(
-        "게시글 작성 중 오류가 발생했어요. 잠시 후 다시 시도해주세요."
-      );
-    }
-  };
-
-  useEffect(() => {
-    const loadPosts = async () => {
-      try {
-        const fetchedPosts = await fetchPosts(selectedCategory);
-        setPosts(fetchedPosts);
-      } catch (error) {
-        console.error("Failed to load posts:", error);
-        toast.error(
-          "게시글을 불러오는 중 오류가 발생했어요. 잠시 후 다시 시도해주세요."
-        );
-      }
-    };
-
-    loadPosts();
-  }, [selectedCategory]);
+export default function CommunityPage() {
+  const c = useCommunityPage();
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-muted/30">
       <div className="mx-auto flex max-w-6xl gap-6 px-4 py-8 lg:px-0">
-        {/* 좌측 사이드바 - 카테고리 */}
         <CategorySidebar
           categories={CATEGORIES}
-          selectedCategory={selectedCategory}
-          onSelect={setSelectedCategory}
+          selectedCategory={c.selectedCategory}
+          onSelect={c.setSelectedCategory}
         />
 
-        {/* 중앙 영역 */}
         <main className="flex-1 space-y-6">
-          {/* 상단 탭 (모바일/태블릿용 카테고리 선택) */}
           <MobileCategoryTab
             categories={CATEGORIES}
-            selectedCategory={selectedCategory}
-            onSelect={setSelectedCategory}
+            selectedCategory={c.selectedCategory}
+            onSelect={c.setSelectedCategory}
           />
 
-          {/* 글 작성 영역*/}
           <Composer
-            value={newPostContent}
-            onChange={setNewPostContent}
-            title={newPostTitle}
-            onTitleChange={setNewPostTitle}
-            anonymous={isAnonymous}
-            onToggleAnonymous={() => setIsAnonymous((v) => !v)}
-            onSubmit={handleCreatePost}
+            value={c.newPostContent}
+            onChange={c.setNewPostContent}
+            title={c.newPostTitle}
+            onTitleChange={c.setNewPostTitle}
+            category={c.writeCategory}
+            onCategoryChange={c.setWriteCategory}
+            anonymous={c.isAnonymous}
+            onToggleAnonymous={() => c.setIsAnonymous((v) => !v)}
+            onSubmit={c.handleCreatePost}
+            open={c.isWriteModalOpen}
+            onOpenChange={c.setIsWriteModalOpen}
           />
 
           <Separator />
 
-          {/* 게시글 리스트 */}
           <section className="space-y-4">
-            {posts.map((post) => (
+            {c.posts.map((post) => (
               <PostCard
                 key={post.id}
                 post={post}
                 categoryLabel={
-                  CATEGORIES.find((c) => c.id === post.category)?.label
+                  CATEGORIES.find((x) => x.id === post.category)?.label
                 }
+                onDelete={c.handleDelete}
               />
             ))}
 
-            {posts.length === 0 && (
+            {c.posts.length === 0 && (
               <div className="py-16 text-center text-sm text-muted-foreground">
-                아직 이 카테고리에 글이 없어요. 첫 글의 주인공이 되어 주세요! ✨
+                아직 이 카테고리에 글이 없어요. 첫 글의 주인공이 되어 주세요!
               </div>
             )}
           </section>
+
+          {c.totalCount > PAGE_SIZE && (
+            <div className="flex justify-center gap-2 pt-6">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={c.page === 1}
+                onClick={() => c.setPage((p) => p - 1)}
+              >
+                이전
+              </Button>
+
+              <span className="text-sm flex items-center">
+                {c.page} / {Math.ceil(c.totalCount / PAGE_SIZE)}
+              </span>
+
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={c.page === Math.ceil(c.totalCount / PAGE_SIZE)}
+                onClick={() => c.setPage((p) => p + 1)}
+              >
+                다음
+              </Button>
+            </div>
+          )}
         </main>
       </div>
     </div>
   );
 }
-
-export default CommunityPage;
