@@ -13,48 +13,40 @@ export function NaverLikeClock() {
 
   useEffect(() => {
     const update = () => {
-      const now = new Date();
+      const now = new Date(); // 사용자의 현재 시각
 
-      // KST 기준으로 바로 포맷 (toLocaleString + new Date 문자열 파싱은 굳이 안 써도 됨)
-      const kstOptions: Intl.DateTimeFormatOptions = {
-        timeZone: "Asia/Seoul",
-      };
+      // 한국 시간(KST) 포맷 설정을 한 번만 정의
+      const kstFormatter = (options: Intl.DateTimeFormatOptions) =>
+        new Intl.DateTimeFormat("ko-KR", {
+          ...options,
+          timeZone: "Asia/Seoul", // 이 설정이 핵심입니다.
+        }).format(now);
 
-      const kst = new Date(
-        now.toLocaleString("en-US", { timeZone: "Asia/Seoul" })
-      );
-
-      const dateStr = new Intl.DateTimeFormat("ko-KR", {
+      const dateStr = kstFormatter({
         year: "numeric",
         month: "long",
         day: "numeric",
-        ...kstOptions,
-      }).format(kst);
+      });
 
-      const weekdayStr = new Intl.DateTimeFormat("ko-KR", {
-        weekday: "long",
-        ...kstOptions,
-      }).format(kst);
+      const weekdayStr = kstFormatter({ weekday: "long" });
 
-      const timeStr = new Intl.DateTimeFormat("ko-KR", {
+      const timeStr = kstFormatter({
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
         hour12: false,
-        ...kstOptions,
-      }).format(kst);
+      });
 
       setClock({ dateStr, timeStr, weekdayStr });
     };
 
-    update(); // 첫 렌더 직후 한 번
+    update();
     const id = setInterval(update, 1000);
     return () => clearInterval(id);
   }, []);
 
-  const dateStr = clock?.dateStr ?? "\u00A0";
-  const timeStr = clock?.timeStr ?? "\u00A0";
-  const weekdayStr = clock?.weekdayStr ?? "\u00A0";
+  // 초기 로딩 시 레이아웃 깨짐 방지
+  if (!clock) return <div className="min-h-[240px]" />;
 
   return (
     <div className="flex min-h-[240px] flex-col items-center justify-center rounded-xl border bg-white/70 p-8 text-center shadow-sm backdrop-blur dark:bg-neutral-900/70">
@@ -62,13 +54,13 @@ export function NaverLikeClock() {
         대한민국 표준시 (KST)
       </div>
       <div className="mt-2 text-xl font-medium">
-        {dateStr} · {weekdayStr}
+        {clock.dateStr} · {clock.weekdayStr}
       </div>
       <div className="mt-3 text-5xl font-bold tabular-nums tracking-widest md:text-6xl">
-        {timeStr}
+        {clock.timeStr}
       </div>
       <p className="mt-3 text-xs text-neutral-500">
-        * 네이버 시계와 동일한 KST 기반 실시간 표시
+        * 접속 기기의 시계를 기준으로 KST 시간을 표시합니다.
       </p>
     </div>
   );

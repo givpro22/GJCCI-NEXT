@@ -21,9 +21,6 @@ export default function page() {
       <HeroSection />
 
       <TimeTools />
-
-      {/* <SupportBand /> */}
-      {/* <Footer /> */}
     </>
   );
 }
