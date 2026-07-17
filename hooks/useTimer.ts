@@ -2,6 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 // Timer hook with deadline-based ticking and improved accuracy
 
+// 알림 배경 색상 — 순색(red/blue/green)보다 부드러운 톤
+const FLASH_COLORS = {
+  half: "#60a5fa", // 절반 남음 — 파랑
+  warning: "#4ade80", // 1분 30초 남음 — 초록
+  done: "#f87171", // 종료 — 빨강
+} as const;
+
 export function useTimer() {
   const deadlineRef = useRef<number | null>(null);
   const prevRemainingRef = useRef<number>(0);
@@ -11,9 +18,7 @@ export function useTimer() {
   const [seconds, setSeconds] = useState(0);
   const [remaining, setRemaining] = useState(0);
   const [running, setRunning] = useState(false);
-  const [flash, setFlash] = useState(false);
-  const [halfFlash, setHalfFlash] = useState(false);
-  const [warningFlash, setWarningFlash] = useState(false);
+  const [flashColor, setFlashColor] = useState<string | null>(null);
   const beepRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -37,7 +42,7 @@ export function useTimer() {
         prevRemainingRef.current > halfThreshold &&
         next <= halfThreshold
       ) {
-        setHalfFlash(true);
+        setFlashColor(FLASH_COLORS.half);
         halfTriggeredRef.current = true;
       }
       if (
@@ -45,7 +50,7 @@ export function useTimer() {
         prevRemainingRef.current > 90 &&
         next <= 90
       ) {
-        setWarningFlash(true);
+        setFlashColor(FLASH_COLORS.warning);
         warningTriggeredRef.current = true;
       }
 
@@ -53,7 +58,7 @@ export function useTimer() {
 
       if (next <= 0) {
         setRunning(false);
-        setFlash(true);
+        setFlashColor(FLASH_COLORS.done);
         deadlineRef.current = null;
         setRemaining(0);
         setTimeout(() => {
@@ -82,65 +87,32 @@ export function useTimer() {
     return () => clearInterval(id);
   }, [running, remaining, seconds]);
 
+  // 알림 flash — 배경을 부드럽게 켰다 껐다(색상은 트리거 시점에 결정)
   useEffect(() => {
-    if (!flash) return;
-    const originalBg = document.body.style.backgroundColor;
-    let count = 0;
-    const id = setInterval(() => {
-      document.body.style.backgroundColor =
-        document.body.style.backgroundColor === "red" ? originalBg : "red";
-      count++;
-      if (count >= 8) {
-        clearInterval(id);
-        document.body.style.backgroundColor = originalBg;
-        setFlash(false);
-      }
-    }, 500);
-    return () => {
-      clearInterval(id);
-      document.body.style.backgroundColor = originalBg;
-    };
-  }, [flash]);
+    if (!flashColor) return;
+    const body = document.body;
+    const originalBg = body.style.backgroundColor;
+    const originalTransition = body.style.transition;
+    body.style.transition = "background-color 0.35s ease";
 
-  useEffect(() => {
-    if (!halfFlash) return;
-    const originalBg = document.body.style.backgroundColor;
     let count = 0;
     const id = setInterval(() => {
-      document.body.style.backgroundColor =
-        document.body.style.backgroundColor === "blue" ? originalBg : "blue";
+      // count 짝/홀로 토글 (색상 문자열 비교 대신 안전하게)
+      body.style.backgroundColor = count % 2 === 0 ? flashColor : originalBg;
       count++;
       if (count >= 8) {
         clearInterval(id);
-        document.body.style.backgroundColor = originalBg;
-        setHalfFlash(false);
+        body.style.backgroundColor = originalBg;
+        setFlashColor(null);
       }
     }, 500);
-    return () => {
-      clearInterval(id);
-      document.body.style.backgroundColor = originalBg;
-    };
-  }, [halfFlash]);
 
-  useEffect(() => {
-    if (!warningFlash) return;
-    const originalBg = document.body.style.backgroundColor;
-    let count = 0;
-    const id = setInterval(() => {
-      document.body.style.backgroundColor =
-        document.body.style.backgroundColor === "green" ? originalBg : "green";
-      count++;
-      if (count >= 8) {
-        clearInterval(id);
-        document.body.style.backgroundColor = originalBg;
-        setWarningFlash(false);
-      }
-    }, 500);
     return () => {
       clearInterval(id);
-      document.body.style.backgroundColor = originalBg;
+      body.style.backgroundColor = originalBg;
+      body.style.transition = originalTransition;
     };
-  }, [warningFlash]);
+  }, [flashColor]);
 
   const mmss = useMemo(() => {
     const m = Math.floor(remaining / 60)
@@ -158,8 +130,7 @@ export function useTimer() {
     }
   }
 
-  function setPreset(min: number) {
-    const total = Math.max(0, Math.round(min * 60));
+  function applySeconds(total: number) {
     setSeconds(total);
     setRemaining(total);
     prevRemainingRef.current = total;
@@ -170,10 +141,13 @@ export function useTimer() {
     ensureNotifyPermission();
   }
 
-  function setCustom() {
-    const v = window.prompt("타이머 시간을 입력하세요 (예: 25, 10:00, 1:30)");
-    if (!v) return;
-    const parts = v.split(":");
+  function setPreset(min: number) {
+    applySeconds(Math.max(0, Math.round(min * 60)));
+  }
+
+  // 입력 문자열("25", "10:00", "1:30")을 파싱해 적용. 성공 시 true.
+  function applyCustomTime(value: string): boolean {
+    const parts = value.trim().split(":");
     let total = 0;
     if (parts.length === 1) {
       const min = Number(parts[0]);
@@ -181,27 +155,15 @@ export function useTimer() {
     } else if (parts.length === 2) {
       const min = Number(parts[0]);
       const sec = Number(parts[1]);
-      if (
-        Number.isFinite(min) &&
-        Number.isFinite(sec) &&
-        min >= 0 &&
-        sec >= 0
-      ) {
+      if (Number.isFinite(min) && Number.isFinite(sec) && min >= 0 && sec >= 0) {
         total = Math.round(min * 60 + sec);
       }
     }
     if (total > 0) {
-      setSeconds(total);
-      setRemaining(total);
-      prevRemainingRef.current = total;
-      halfTriggeredRef.current = false;
-      warningTriggeredRef.current = false;
-      deadlineRef.current = null;
-      setRunning(false);
-      ensureNotifyPermission();
-    } else {
-      alert("입력 형식이 올바르지 않습니다.");
+      applySeconds(total);
+      return true;
     }
+    return false;
   }
 
   function toggle() {
@@ -263,7 +225,7 @@ export function useTimer() {
     remaining,
     running,
     setPreset,
-    setCustom,
+    applyCustomTime,
     toggle,
     reset,
     beepRef,
