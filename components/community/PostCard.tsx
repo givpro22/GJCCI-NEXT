@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ThumbsUp, MessageCircle, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Post } from "@/lib/definitions";
 import { useSession } from "next-auth/react";
 import {
@@ -47,7 +47,7 @@ export default function PostCard({
       await deletePost(post.id);
       toast.success("게시글이 성공적으로 삭제되었어요.");
       onDelete?.(post.id);
-    } catch (error) {
+    } catch {
       toast.error(
         "게시글 삭제 중 오류가 발생했어요. 잠시 후 다시 시도해주세요."
       );

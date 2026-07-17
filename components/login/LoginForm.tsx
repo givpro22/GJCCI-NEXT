@@ -8,14 +8,12 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useSearchParams } from "next/navigation";
 import { startTransition, useActionState } from "react";
 import { authenticate } from "@/lib/actions";
 import { ROUTES } from "@/constants/routes";
@@ -31,8 +29,6 @@ const formSchema = z.object({
 });
 
 export function LoginForm() {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [errorMessage, formAction, isPending] = useActionState(
     authenticate,
     undefined

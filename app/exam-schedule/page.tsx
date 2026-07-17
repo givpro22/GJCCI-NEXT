@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClientSideSupabaseClient } from "@/utils/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -29,7 +29,7 @@ export default function ExamSchedulePage() {
   const [open, setOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const fetchImages = async () => {
+  const fetchImages = useCallback(async () => {
     if (!dateRange?.from || !dateRange?.to) return;
 
     setLoading(true);
@@ -82,7 +82,7 @@ export default function ExamSchedulePage() {
 
     setImages(urls);
     setLoading(false);
-  };
+  }, [dateRange]);
 
   const handleDeleteImage = async () => {
     if (!previewImage) return;
@@ -118,6 +118,8 @@ export default function ExamSchedulePage() {
     }
   };
 
+  // 초기 기간(오늘)은 마운트 후 클라이언트에서 설정한다.
+  // (서버/클라이언트 시간대 차이로 인한 hydration 불일치 방지)
   useEffect(() => {
     const today = new Date();
 
@@ -127,13 +129,16 @@ export default function ExamSchedulePage() {
     const end = new Date(today);
     end.setHours(23, 59, 59, 999);
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 마운트 시 1회 초기화(의도적)
     setDateRange({ from: start, to: end });
   }, []);
 
+  // 선택 기간이 준비되면 이미지 목록을 불러온다(데이터 페칭 effect).
   useEffect(() => {
     if (!dateRange?.from || !dateRange?.to) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 외부(Storage) 데이터 페칭
     fetchImages();
-  }, [dateRange]);
+  }, [fetchImages, dateRange]);
 
   return (
     <div className="p-6 space-y-6">
@@ -192,8 +197,9 @@ export default function ExamSchedulePage() {
             <img
               key={url}
               src={url}
+              alt="시험 일정표"
               onClick={() => setPreviewImage(url)}
-              className="rounded border object-contain aspect-[3/4] bg-white cursor-pointer hover:opacity-80 transition"
+              className="rounded border object-contain aspect-3/4 bg-white cursor-pointer hover:opacity-80 transition"
             />
           ))}
         </div>
@@ -212,7 +218,11 @@ export default function ExamSchedulePage() {
 
           <div className="max-h-[80vh] overflow-auto flex justify-center">
             {previewImage && (
-              <img src={previewImage} className="object-contain" />
+              <img
+                src={previewImage}
+                alt="시험 일정표 미리보기"
+                className="object-contain"
+              />
             )}
           </div>
         </DialogContent>

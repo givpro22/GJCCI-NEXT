@@ -44,7 +44,7 @@ export default function MyProfilePage() {
         await updateMyProfile({ name });
         setIsEditing(false);
         await update();
-      } catch (error) {
+      } catch {
         toast.error("프로필 업데이트에 실패했습니다.");
       }
     });
