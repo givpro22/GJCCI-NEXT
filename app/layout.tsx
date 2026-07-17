@@ -5,6 +5,7 @@ import { Header } from "@/components/layout";
 import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +38,7 @@ export default async function RootLayout({
           <Toaster />
           <Header />
           {children}
+          <ChatWidget />
         </SessionProvider>
       </body>
     </html>
