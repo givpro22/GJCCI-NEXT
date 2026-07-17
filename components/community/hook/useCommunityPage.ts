@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { CategoryId, Post } from "@/lib/definitions";
@@ -9,7 +10,8 @@ import { PAGE_SIZE } from "@/constants/constants";
 export function useCommunityPage() {
   const { data: session } = useSession();
 
-  const [selectedCategory, setSelectedCategory] = useState<CategoryId>("all");
+  const [selectedCategory, setSelectedCategoryState] =
+    useState<CategoryId>("all");
 
   const [writeCategory, setWriteCategory] = useState<CategoryId>("notice");
   const [newPostContent, setNewPostContent] = useState("");
@@ -21,10 +23,11 @@ export function useCommunityPage() {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  // 카테고리 바뀌면 1페이지로
-  useEffect(() => {
+  // 카테고리 변경 시 1페이지로 리셋 (effect 없이 이벤트 시점에 함께 처리)
+  const setSelectedCategory: Dispatch<SetStateAction<CategoryId>> = (value) => {
+    setSelectedCategoryState(value);
     setPage(1);
-  }, [selectedCategory]);
+  };
 
   // 목록 로딩
   useEffect(() => {

@@ -80,7 +80,7 @@ export default function ExamScheduleUploader({
       toast.info("시험 일정표가 성공적으로 업로드되었습니다.");
 
       onSuccess?.();
-    } catch (e) {
+    } catch {
       toast.error("일정표 업로드 중 오류가 발생했습니다.");
     } finally {
       setUploading(false);
@@ -154,6 +154,7 @@ export default function ExamScheduleUploader({
             <img
               key={img.id}
               src={img.uploadedUrl ?? img.url}
+              alt="업로드한 일정표 미리보기"
               className="rounded border cursor-pointer"
               onClick={() => setPreview(img)}
             />
@@ -164,7 +165,11 @@ export default function ExamScheduleUploader({
       <Dialog open={!!preview} onOpenChange={() => setPreview(null)}>
         <DialogContent>
           {preview && (
-            <img src={preview.uploadedUrl ?? preview.url} className="w-full" />
+            <img
+              src={preview.uploadedUrl ?? preview.url}
+              alt="일정표 미리보기"
+              className="w-full"
+            />
           )}
         </DialogContent>
       </Dialog>

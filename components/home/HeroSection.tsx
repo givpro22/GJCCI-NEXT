@@ -3,7 +3,7 @@ export function HeroSection() {
     <section className="py-10 text-center">
       <>
         <img
-          src="./og-image.png"
+          src="/og-image.png"
           alt="광주상공회의소 타이머"
           className="h-18 mx-auto mb-4"
         />
