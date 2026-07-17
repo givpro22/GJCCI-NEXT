@@ -1,3 +1,5 @@
+"use client";
+
 import { useTimer } from "@/hooks/useTimer";
 export function TimerCard() {
   const {
