@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import { MessageCircle, Send, Users, X } from "lucide-react";
+import { MessageCircle, Pencil, Send, Users, X } from "lucide-react";
 import { createClientSideSupabaseClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,13 @@ type ChatMessage = {
 
 function labelOf(identity: Identity) {
   return `${identity.exam} · ${identity.role}`;
+}
+
+function formatTime(at: number) {
+  return new Date(at).toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 // 새 메시지 알림용 짧은 비프음 (에셋 없이 Web Audio 사용)
@@ -63,6 +70,7 @@ export function ChatWidget() {
   // 설정 폼 임시 선택값
   const [examSel, setExamSel] = useState<string>("필기");
   const [roleSel, setRoleSel] = useState<string>("부감독");
+  const [editing, setEditing] = useState(false); // 신원 재설정 중인지
 
   // 세션 발신자 ID — 렌더에 노출되지 않으므로 lazy init로 1회 생성
   const [senderId] = useState(() => crypto.randomUUID());
@@ -135,12 +143,22 @@ export function ChatWidget() {
 
   const handleJoin = () => {
     const next: Identity = { exam: examSel, role: roleSel };
+    // 신원이 바뀌면 구독 effect가 재실행되어 presence 라벨도 갱신됨
     setIdentity(next);
+    setEditing(false);
     try {
       localStorage.setItem(IDENTITY_KEY, JSON.stringify(next));
     } catch {
       // 저장 실패해도 세션 내에서는 동작
     }
+  };
+
+  const startEdit = () => {
+    if (identity) {
+      setExamSel(identity.exam);
+      setRoleSel(identity.role);
+    }
+    setEditing(true);
   };
 
   const handleSend = () => {
@@ -200,23 +218,40 @@ export function ChatWidget() {
                 </span>
               )}
             </div>
-            <button
-              type="button"
-              onClick={closePanel}
-              aria-label="채팅 닫기"
-              className="text-muted-foreground transition hover:text-foreground"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <div className="flex items-center gap-1">
+              {identity && !editing && (
+                <button
+                  type="button"
+                  onClick={startEdit}
+                  aria-label="구분·역할 수정"
+                  className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                >
+                  <Pencil className="h-3 w-3" />
+                  {labelOf(identity)}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={closePanel}
+                aria-label="채팅 닫기"
+                className="text-muted-foreground transition hover:text-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
-          {!identity ? (
-            /* 채팅 전 신원 설정 */
+          {!identity || editing ? (
+            /* 채팅 전 신원 설정 / 신원 수정 */
             <div className="flex flex-1 flex-col justify-center gap-5 p-6">
               <div className="space-y-1 text-center">
-                <p className="text-sm font-medium">채팅에 참여하려면</p>
+                <p className="text-sm font-medium">
+                  {editing ? "구분·역할 변경" : "채팅에 참여하려면"}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  구분과 역할을 먼저 선택하세요.
+                  {editing
+                    ? "변경할 구분과 역할을 선택하세요."
+                    : "구분과 역할을 먼저 선택하세요."}
                 </p>
               </div>
 
@@ -262,9 +297,20 @@ export function ChatWidget() {
                 </div>
               </div>
 
-              <Button onClick={handleJoin} className="mt-2">
-                {examSel} · {roleSel}(으)로 참여
-              </Button>
+              <div className="mt-2 flex gap-2">
+                {editing && (
+                  <Button
+                    variant="ghost"
+                    className="flex-1"
+                    onClick={() => setEditing(false)}
+                  >
+                    취소
+                  </Button>
+                )}
+                <Button onClick={handleJoin} className="flex-1">
+                  {editing ? "변경 저장" : `${examSel} · ${roleSel}(으)로 참여`}
+                </Button>
+              </div>
             </div>
           ) : (
             <>
@@ -286,7 +332,7 @@ export function ChatWidget() {
                         )}
                       >
                         <span className="mb-0.5 px-1 text-[11px] text-muted-foreground">
-                          {mine ? "나" : m.name}
+                          {mine ? "나" : m.name} · {formatTime(m.at)}
                         </span>
                         <div
                           className={cn(
