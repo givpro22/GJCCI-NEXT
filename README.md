@@ -37,7 +37,9 @@
 
 > 개인정보 보호를 위해 **본인 외 다른 부감독관의 정보는 모두 모자이크** 처리했으며, **본인 연락처 또한 일부(뒤 4자리)를 마스킹**했습니다.
 
-![광주상공회의소 상시검정 부감독관 명단](docs/images/proctor-roster.jpg)
+<p align="center">
+  <img src="docs/images/proctor-roster.jpg" alt="광주상공회의소 상시검정 부감독관 명단" width="340" />
+</p>
 
 ---
 
